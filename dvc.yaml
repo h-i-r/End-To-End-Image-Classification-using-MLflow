@@ -14,7 +14,6 @@ stages:
     outs:
       - artifacts/model
 
-
   training:
     cmd: python src/image_classifier/pipeline/stage_02.py
     deps:
