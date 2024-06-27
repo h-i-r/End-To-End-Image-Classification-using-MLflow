@@ -1,0 +1,53 @@
+stages:
+
+  prepare_base_model:
+    cmd: python src/image_classifier/pipeline/stage_01.py
+    deps:
+      - src/image_classifier/pipeline/stage_01.py
+      - config/config.yaml
+    params:
+      - IMAGE_SIZE
+      - INCLUDE_TOP
+      - CLASSES
+      - WEIGHTS
+      - LEARNING_RATE
+    outs:
+      - artifacts/model
+
+
+  training:
+    cmd: python src/image_classifier/pipeline/stage_02.py
+    deps:
+      - src/image_classifier/pipeline/stage_02.py
+      - config/config.yaml
+      - src/image_classifier/components/data
+      - artifacts/model
+    params:
+      - IMAGE_SIZE
+      - EPOCHS
+      - BATCH_SIZE
+      - AUGMENTATION
+    outs:
+      - artifacts/train/model.h5
+
+
+  evaluation:
+    cmd: python src/image_classifier/pipeline/stage_03.py
+    deps:
+      - src/image_classifier/pipeline/stage_03.py
+      - config/config.yaml
+      - src/image_classifier/components/data
+      - artifacts/train/model.h5
+    params:
+      - IMAGE_SIZE
+      - BATCH_SIZE
+    metrics:
+    - scores.json:
+        cache: false
+
+  predict:
+    cmd: python src/image_classifier/pipeline/stage_04.py
+    deps:
+      - src/image_classifier/pipeline/stage_04.py
+      - src/image_classifier/components/predict
+      - artifacts/train/model.h5
